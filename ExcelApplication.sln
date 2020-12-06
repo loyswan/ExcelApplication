@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelApplication", "ExcelAp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelApplication.WPFNET452", "ExcelApplication.WPFNET452\ExcelApplication.WPFNET452.csproj", "{2F495385-3AB7-4C48-BFC7-657125FDF847}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "publish", "publish", "{05F7E7D7-00E9-43BE-986A-9651C3FC774D}"
+	ProjectSection(SolutionItems) = preProject
+		发布文件夹.txt = 发布文件夹.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
