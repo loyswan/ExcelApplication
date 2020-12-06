@@ -115,8 +115,8 @@ namespace ExcelApplication.Services
                     ?? package.Workbook.Worksheets.Add(worksheetname);
 
                 //worksheet.Cells.Clear();
-                var endrow = worksheet.Dimension.End.Row;
-                if (endrow >= 4)
+                var endrow = worksheet.Dimension?.End.Row;
+                if (endrow.GetValueOrDefault() >= 4)
                 {
                     ExcelRange rng = worksheet.Cells[4, 1, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column];
                     rng.Clear();

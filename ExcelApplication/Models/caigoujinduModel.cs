@@ -81,8 +81,6 @@ namespace ExcelApplication.Models
             this.songhuoriqi = songhuoriqi;
             this.songhuodanhao = songhuodanhao;
             this.songhuoshu = songhuoshu;
-
-
         }
 
         //入库序号        

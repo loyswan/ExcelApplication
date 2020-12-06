@@ -2,10 +2,12 @@
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ExcelApplication.Services
 {
@@ -34,21 +36,22 @@ namespace ExcelApplication.Services
             }
 
             var lists = new List<caigoujinduModel>();
-
-            using (ExcelPackage package = new ExcelPackage(CurrentFileInfo))
+            try
             {
-                ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault(s => s.Name == worksheetname)
-                    ?? package.Workbook.Worksheets[0];
+                using (ExcelPackage package = new ExcelPackage(CurrentFileInfo))
+                {
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault(s => s.Name == worksheetname)
+                        ?? package.Workbook.Worksheets[0];
 
-                //取得表格第一列最后一有效行 行号
-                var endrow = worksheet.Cells[1, 1, worksheet.Dimension.End.Row, 1]
-                    .Last(c => c.Value != null).End.Row;
+                    //取得表格第一列最后一有效行 行号
+                    var endrow = worksheet.Cells[1, 1, worksheet.Dimension.End.Row, 1]
+                        .Last(c => c.Value != null).End.Row;
 
-                //表头2行 格式行1行 低于3行视为无数据，第四行起为有效数据行
-                if (endrow <= 3) return lists;
+                    //表头2行 格式行1行 低于3行视为无数据，第四行起为有效数据行
+                    if (endrow <= 3) return lists;
 
-                //逐行读取数据
-                Enumerable.Range(4, endrow - 4 + 1).ToList().ForEach(row =>
+                    //逐行读取数据
+                    Enumerable.Range(4, endrow - 4 + 1).ToList().ForEach(row =>
                     {
                         var model = new caigoujinduModel();
                         model.gongyinshang = worksheet.Cells[row, 1].Text;
@@ -76,9 +79,20 @@ namespace ExcelApplication.Services
                         model.gongyinshangbeizhu = worksheet.Cells[row, 22].Text;
                         model.qiandaoshu = worksheet.Cells[row, 23].GetValue<int>();
                         //取得当前行的最后一列有效列号
-                        var endcol = worksheet.Cells[row, 23, row, worksheet.Dimension.End.Column]
-                                .First(cell => cell.Offset(0, 1).Value == null).End.Column;
-                        if (endcol > 24)
+                        //var endcol = worksheet.Cells[$"{row}:{row}"].LastOrDefault(c =>
+                        //{
+                        //    Debug.WriteLine(c.Address + "====" +c.Value);
+                        //    return c.Value != null;
+                        //}).End.Column;
+                        var endcell = worksheet.Cells[row, 23, row, worksheet.Dimension.End.Column]
+                            .LastOrDefault(c =>
+                            {
+                                Debug.WriteLine(c.Address + "====" + c.Value);
+                                return c.Value != null;
+                            });
+                        var endcol = endcell==null?23:endcell.End.Column;
+                        Debug.WriteLine(row + "====" + endcol);
+                        if (endcol > 24) //没有送货数据
                         {
                             //添加入库信息
                             for (int col = 24; col < endcol; col += 3)
@@ -91,11 +105,20 @@ namespace ExcelApplication.Services
                                 ));
                             }
                         }
+
                         //添加至列表
                         lists.Add(model);
                     });
+                }
+                return lists;
+
             }
-            return lists;
+            catch (Exception e)
+            {
+
+                MessageBox.Show(e.Message);
+                return new List<caigoujinduModel>();
+            }
         }
     }
 }
