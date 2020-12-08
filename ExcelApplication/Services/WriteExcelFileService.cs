@@ -26,7 +26,7 @@ namespace ExcelApplication.Services
         /// </summary>
         /// <param name="worksheetname"></param>
         /// <returns></returns>
-        public string WriteDuizhang(List<duizhangModel> list, string worksheetname)
+        public string WriteDuizhang(List<duizhangModel> list, string worksheetname, string tableTitle = "")
         {
             if (!this.CurrentFileInfo.Exists)
             {
@@ -39,23 +39,50 @@ namespace ExcelApplication.Services
                 ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault(s => s.Name == worksheetname)
                     ?? package.Workbook.Worksheets.Add(worksheetname);
 
-                worksheet.Cells.Clear();
-
-                //填写标题行 字体加粗
-                string[] tabletitlestring = { "送货日期", "送货单号", "供应商", "物料类别", "物料名称", "宽CM纸纹", "高CM", "数量", "单价", "金额", "备注" };
-                for (int col = 0; col < tabletitlestring.Length; col++)
+                var endrow = (worksheet.Dimension?.End.Row).GetValueOrDefault();
+                if (endrow >= 4)
                 {
-                    var rng = worksheet.Cells[1, col + 1];
-                    rng.Value = tabletitlestring[col];
-                    rng.Style.Font.Bold = true;
+                    //清除4行以后的内容
+                    worksheet.Cells[4, 1, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
+                        .Clear();
                 }
+                else
+                {
+                    //新表格填充标题行
+                    string tableTitleString = "供应商对账明细表";
+                    string tableTitle1String = "        制表人：区晓欣                入库员： 区晓欣                   领导审核：      ";
+                    worksheet.Cells[1, 1].Value = tableTitle + tableTitleString;
+                    worksheet.Cells[2, 1].Value = tableTitle1String;
+                    worksheet.Cells[1, 1].Style.Font.Size = 22;
+                    worksheet.Cells[2, 1].Style.Font.Size = 12;
+                    //填写标题行 字体加粗
+                    string[] tableHeaderString = { "送货日期", "送货单号", "供应商", "物料类别", "物料名称", "宽CM纸纹", "高CM", "数量", "单价", "金额", "备注" };
+                    for (int col = 0; col < tableHeaderString.Length; col++)
+                    {
+                        var rng = worksheet.Cells[3, col + 1];
+                        rng.Value = tableHeaderString[col];
+                    }
+
+                    worksheet.Cells[1, 1, 1, tableHeaderString.Length].Style.HorizontalAlignment = ExcelHorizontalAlignment.CenterContinuous;
+                    worksheet.Cells[2, 1, 2, tableHeaderString.Length].Style.HorizontalAlignment = ExcelHorizontalAlignment.CenterContinuous;
+                    using (var headercell = worksheet.Cells[3, 1, 3, tableHeaderString.Length])
+                    {
+                        headercell.Style.Font.Bold = true;
+                        headercell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        headercell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        headercell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        headercell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    }
+                }
+
+
                 //填写内容
                 if (list.Count == 0) //没有内容直接保存退出
                 {
                     package.Save();
                     return $"Error: 没有符合条件的数据！";
                 }
-                int row = 2;
+                int row = 4;  //第四行开始写数据
                 list.ForEach(duizhang =>
                 {
                     worksheet.Cells[row, 1].Value = duizhang.songhuoriqi;
@@ -69,15 +96,17 @@ namespace ExcelApplication.Services
                     worksheet.Cells[row, 9].Value = duizhang.danjia;
                     //worksheet.Cells[row, 10].Value = duizhang.jine;
                     worksheet.Cells[row, 11].Value = duizhang.beizu;
+
+                    worksheet.Row(row).Height = 21;//行高 24
                     row++;
                 });
-                //填写公式
-                worksheet.Cells[2, 10, list.Count + 1, 10].Formula = "=IF(G2=0,H2*I2,F2*G2*0.0001*H2*I2)";
+                //填写公式 第四行开始写数据
+                worksheet.Cells[4, 10, list.Count + 3, 10].Formula = "=IF(G4=0,H4*I4,F4*G4*0.0001*H4*I4)";
                 //单元格格式
-                worksheet.Cells[2, 1, list.Count + 1, 1].Style.Numberformat.Format = "yyyy/m/d";
-                worksheet.Cells[2, 9, list.Count + 1, 10].Style.Numberformat.Format = "0.00";
+                worksheet.Cells[4, 1, list.Count + 3, 1].Style.Numberformat.Format = "yyyy/m/d";
+                worksheet.Cells[4, 9, list.Count + 3, 10].Style.Numberformat.Format = "0.00";
                 //绘制边框
-                using (var r = worksheet.Cells[1, 1, list.Count + 1, 11])
+                using (var r = worksheet.Cells[4, 1, list.Count + 3, 11])
                 {
                     r.Style.Border.Top.Style = ExcelBorderStyle.Thin;
                     r.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
@@ -101,6 +130,7 @@ namespace ExcelApplication.Services
             }
         }
 
+
         public string WriteJindu(List<caigoujinduModel> list, string worksheetname)
         {
             if (!this.CurrentFileInfo.Exists)
@@ -115,11 +145,18 @@ namespace ExcelApplication.Services
                     ?? package.Workbook.Worksheets.Add(worksheetname);
 
                 //worksheet.Cells.Clear();
-                var endrow = worksheet.Dimension?.End.Row;
-                if (endrow.GetValueOrDefault() >= 4)
+                var endrow = (worksheet.Dimension?.End.Row).GetValueOrDefault();
+                if (endrow >= 4)
                 {
-                    ExcelRange rng = worksheet.Cells[4, 1, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column];
-                    rng.Clear();
+                    //清除4行以后的内容
+                    worksheet.Cells[4, 1, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
+                        .Clear();
+                }
+                else
+                {
+                    //新表格填充标题行
+                    package.Dispose();//此处直接报错
+                    return $"Error: 工作簿中无{worksheetname}工作表不存在。";
                 }
 
                 //填写内容  第四行开始填写（1、2行标题，3行格式行）
@@ -157,6 +194,7 @@ namespace ExcelApplication.Services
                         worksheet.Cells[row, 24 - 2 + (r.rukuxuhao) * 3].Value = r.songhuodanhao;
                         worksheet.Cells[row, 24 - 1 + (r.rukuxuhao) * 3].Value = r.songhuoshu;
                     });
+                    worksheet.Row(row).Height = 24;//行高 24
                     row++;
                 });
 
@@ -186,54 +224,101 @@ namespace ExcelApplication.Services
                 ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault(s => s.Name == worksheetname)
                     ?? package.Workbook.Worksheets.Add(worksheetname);
 
-                worksheet.Cells.Clear();
-                //var endrow = worksheet.Dimension.End.Row;
-                //if (endrow >= 3) //第三行开始填写 1行标题、2行表头
-                //{
-                //    ExcelRange rng = worksheet.Cells[3, 1, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column];
-                //    rng.Clear();
-                //}
-                //获取所有年月字符串
+                //填写标题行   1、2行标题
+                var endrow = (worksheet.Dimension?.End.Row).GetValueOrDefault();
+                if (endrow >= 3)
+                {
+                    //清除3行以后的内容   
+                    worksheet.Cells[3, 1, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
+                        .Clear();
+                }
+                else
+                {
+                    //新表格填充标题行
+                    string tableTitleString = "供应商月份应付账款表";
+                    string tableTitle1String = "制表人：区晓欣";
+                    string tableTitle2String = "审核：";
+                    string tableTitle3String = "领导审核：";
+
+                    worksheet.Cells[1, 1].Value = tableTitleString;
+                    worksheet.Cells[2, 1].Value = tableTitle1String;
+                    worksheet.Cells[2, 3].Value = tableTitle2String;
+                    worksheet.Cells[2, 5].Value = tableTitle3String;
+                    worksheet.Cells[1, 1].Style.Font.Size = 22;
+                    worksheet.Cells[2, 1, 2, 5].Style.Font.Size = 12;
+                }
+
+                //填写表头行 字体加粗
+                string[] tableHeader1String = { "序号", "供应商", "物料类别", "物料名称" };
+                string[] tableHeader2String = { "是否含税", "备注" };
+
+                int col = 1;
+                //填写第一部分表头
+                tableHeader1String.ToList().ForEach(t =>
+                {
+                    var rng = worksheet.Cells[3, col, 4, col];
+                    rng.Merge = true;
+                    rng.Value = t;
+                    col++;
+                });
+                //获取所有年月字符串 表头中间部分
                 List<string> monthstr = new List<string>();
                 list.ForEach(tj => monthstr.AddRange(tj.GetMonthString()));
-#if NET452
                 monthstr = monthstr.Distinct().ToList().OrderBy(m => Convert.ToDateTime(m)).ToList();
-#else
-                monthstr = monthstr.ToHashSet().ToList().OrderBy(m => Convert.ToDateTime(m)).ToList();
-#endif
+                monthstr.ForEach(m =>
+                {
+                    var rng = worksheet.Cells[3, col, 3, col + 1];
+                    rng.Merge = true;
+                    rng.Value = m;
+                    worksheet.Cells[4, col].Value = "数量";
+                    worksheet.Cells[4, col + 1].Value = "金额";
+                    col += 2;
+                });
+                //填写第二部分表头
+                tableHeader2String.ToList().ForEach(t =>
+                {
+                    var rng = worksheet.Cells[3, col, 4, col];
+                    rng.Merge = true;
+                    rng.Value = t;
+                    col++;
+                });
+                //表头格式化
+                worksheet.Cells[1, 1, 1, col - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.CenterContinuous;
 
+                using (var headercell = worksheet.Cells[3, 1, 4, col - 1])
+                {
+                    headercell.Style.Font.Bold = true;
+                    headercell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    headercell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
 
-                //填写表头  字体加粗
-                List<string> header = new List<string>();
+                    headercell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    headercell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    headercell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    headercell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                }
 
-                header.Add("序号");
-                header.Add("供应商");
-                header.AddRange(monthstr);
-                header.Add("年度合计");
-                header.Add("备注");
-                int col = 1; //第一列写入标题
-                header.ForEach(n => worksheet.Cells[1, col++].Value = n);
-                worksheet.Cells[1, 1, 1, col - 1].Style.Font.Bold = true;
-
-                //填写内容  第二行开始填写（1行标题）
-                int row = 2;
+                //填写内容  第5行开始填写
+                int row = 5;
                 list.ForEach(t =>
                 {
-                    worksheet.Cells[row, 1].Value = row - 1;
+                    worksheet.Cells[row, 1].Value = row - 4; //序号
                     worksheet.Cells[row, 2].Value = t.gongyinshang;
-                    //按年月 填充对应金额
-                    t.pairs.ForEach(p => {
-                        int index = monthstr.IndexOf(p.Key);
-                        worksheet.Cells[row, index + 3].Value = p.Value;
+                    worksheet.Cells[row, 3].Value = t.wuliaoleibie;
+                    worksheet.Cells[row, 4].Value = t.wuliaoming;
+                    //按年月 填充对应数量及金额
+                    t.pairs.ForEach(p =>
+                    {
+                        int index = monthstr.IndexOf(p.MonthString);
+                        worksheet.Cells[row, index * 2 + tableHeader1String.Length + 1].Value = p.Number;
+                        worksheet.Cells[row, index * 2 + tableHeader1String.Length + 2].Value = p.Money;
                     });
-                    //合计金额
-                    worksheet.Cells[row, monthstr.Count + 3].Value = t.hejijine;
 
+                    worksheet.Row(row).Height = 21;//行高 
                     row++;
                 });
 
-                //绘制边框
-                using (var r = worksheet.Cells[1, 1, row, monthstr.Count + 4])
+                //绘制边框  第五行开始
+                using (var r = worksheet.Cells[5, 1, row - 1, monthstr.Count * 2 + tableHeader1String.Length + tableHeader2String.Length])
                 {
                     r.Style.Border.Top.Style = ExcelBorderStyle.Thin;
                     r.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;

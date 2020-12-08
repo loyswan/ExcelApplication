@@ -27,6 +27,7 @@ namespace ExcelApplication
         {
             InitializeComponent();
 
+            //注册Epplus
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 #if NET5
@@ -36,6 +37,16 @@ namespace ExcelApplication
 #endif
         }
 
+        private ReadExcelFileService readExcelFileService;
+        private WriteExcelFileService writeExcelFileService;
+        private ProcessDuiZhangService processDuiZhangService;
+        private ProcessTongJiService processTongJiService;
+        private SearchDuiZhangService searchDuiZhangService;
+
+        //全局数据
+        private List<caigoujinduModel> caigouAlllists;
+        private List<duizhangModel> duizhanglists;
+        private List<tongjiModel> tongjilists;
         //操作文件
         string filepath = string.Empty;
 
@@ -52,61 +63,21 @@ namespace ExcelApplication
                     filepath = msg;
                     ClearMessage();
 
+                    //重新拖入文件后，清除原来的数据
+                    caigouAlllists = null;
+                    duizhanglists = null;
+                    tongjilists = null;
                 }
                 else
                 {
-                    tbPath.Text = "请拖入Excel电子表格（扩展名 .xlsx )";
+                    tbPath.Text = "请拖入电子表格（扩展名 .xlsx )";
                     filepath = string.Empty;
                 }
             }
         }
 
-        private void Card_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-
-        }
 
 
-        private ReadExcelFileService readExcelFileService;
-        private WriteExcelFileService writeExcelFileService;
-        private ProcessDuiZhangService processDuiZhangService;
-        private ProcessTongJiService processTongJiService;
-        private SearchDuiZhangService searchDuiZhangService;
-
-
-        private List<caigoujinduModel> caigouAlllists;
-        private List<duizhangModel> duizhanglists;
-        private List<tongjiModel> tongjilists;
-
-        private void searchButton_Click(object sender, RoutedEventArgs e)
-        {
-            //2020-11-24至2020-12-4材料对账明细表
-            DateTime startdate = StartDatePicker.SelectedDate ?? DateTime.Today;
-            DateTime enddate = EndDatePicker.SelectedDate ?? DateTime.Today;
-            if (startdate > enddate)
-            {
-                ShowMessageError("结束日期不能早于起始日期");
-                return;
-            }
-            ShowMessageInfo($"当前日期范围：{startdate.ToString("yyyy-MM-dd")} 至 {enddate.ToString("yyyy-MM-dd")}");
-
-            if (duizhanglists == null || duizhanglists.Count == 0)
-            {
-                ShowMessageError("请先刷新对账信息文件");
-                return;
-            }
-            searchDuiZhangService = searchDuiZhangService ?? new SearchDuiZhangService();
-            searchDuiZhangService.Duizhanglist = duizhanglists;
-
-            var list = searchDuiZhangService.Search(startdate, enddate);
-            writeExcelFileService = writeExcelFileService ?? new WriteExcelFileService(filepath);
-            var searchstr = writeExcelFileService.WriteDuizhang(list, "输出对账单");
-
-            if (searchstr.StartsWith("Error"))
-                ShowMessageError(searchstr);
-            else
-                ShowMessageInfo("输出对账单完成！");
-        }
 
         private void readFileButton_Click(object sender, RoutedEventArgs e)
         {
@@ -123,6 +94,7 @@ namespace ExcelApplication
             ShowMessageInfo("读取完成！");
         }
 
+
         private void caigouButton_Click(object sender, RoutedEventArgs e)
         {
             if (caigouAlllists == null || caigouAlllists.Count == 0)
@@ -133,8 +105,19 @@ namespace ExcelApplication
             //如果有已完成的数据，就将完成数据转移并 刷新数据
             if (caigouAlllists.Any(x => x.qiandaoshu <= 0))//有完成数据
             {
-                var caigoulists = caigouAlllists.Where(c => c.qiandaoshu > 0).ToList();
-                var caigouOklists = caigouAlllists.Where(c => c.qiandaoshu <= 0).ToList();
+                var caigoulists = new List<caigoujinduModel>();
+                var caigouOklists = new List<caigoujinduModel>();
+
+                caigouAlllists.ForEach(x =>
+                {
+                    if (x.qiandaoshu > 0)
+                        caigoulists.Add(x);
+                    else
+                        caigouOklists.Add(x);
+                });
+
+                //var caigoulists = caigouAlllists.Where(c => c.qiandaoshu > 0).ToList();
+                //var caigouOklists = caigouAlllists.Where(c => c.qiandaoshu <= 0).ToList();
                 writeExcelFileService = writeExcelFileService ?? new WriteExcelFileService(filepath);
                 var caigoustr = writeExcelFileService.WriteJindu(caigoulists, "采购进度表");
                 var caigouokstr = writeExcelFileService.WriteJindu(caigouOklists, "采购进度表(已完成)");
@@ -143,7 +126,12 @@ namespace ExcelApplication
                 else
                     ShowMessageInfo("分类采购进度完成！");
             }
+            else
+            {
+                ShowMessageInfo("没有已完成数据，无需分类。");
+            }
         }
+
 
         private void duizhangButton_Click(object sender, RoutedEventArgs e)
         {
@@ -192,6 +180,38 @@ namespace ExcelApplication
             else
                 ShowMessageInfo("刷新月度统计完成！");
         }
+
+        private void searchButton_Click(object sender, RoutedEventArgs e)
+        {
+            //2020-11-24至2020-12-4材料对账明细表
+            DateTime startdate = StartDatePicker.SelectedDate ?? DateTime.Today;
+            DateTime enddate = EndDatePicker.SelectedDate ?? DateTime.Today;
+            if (startdate > enddate)
+            {
+                ShowMessageError("结束日期不能早于起始日期");
+                return;
+            }
+            string tableTitle = $"{ startdate.ToString("yyyy年M月d日") }至{ enddate.ToString("yyyy年M月d日")}";
+            ShowMessageInfo($"当前日期范围：{tableTitle}");
+
+            if (duizhanglists == null || duizhanglists.Count == 0)
+            {
+                ShowMessageError("请先刷新对账信息文件");
+                return;
+            }
+            searchDuiZhangService = searchDuiZhangService ?? new SearchDuiZhangService();
+            searchDuiZhangService.Duizhanglist = duizhanglists;
+
+            var list = searchDuiZhangService.Search(startdate, enddate);
+            writeExcelFileService = writeExcelFileService ?? new WriteExcelFileService(filepath);
+            var searchstr = writeExcelFileService.WriteDuizhang(list, "输出对账单", tableTitle);
+
+            if (searchstr.StartsWith("Error"))
+                ShowMessageError(searchstr);
+            else
+                ShowMessageInfo("输出对账单完成！");
+        }
+
 
         //==============================================
         private void ShowMessageError(string msg)

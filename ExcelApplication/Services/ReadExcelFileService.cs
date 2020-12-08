@@ -78,21 +78,14 @@ namespace ExcelApplication.Services
                         model.gongyinshangriqi = worksheet.Cells[row, 21].GetValue<DateTime>();
                         model.gongyinshangbeizhu = worksheet.Cells[row, 22].Text;
                         model.qiandaoshu = worksheet.Cells[row, 23].GetValue<int>();
-                        //取得当前行的最后一列有效列号
-                        //var endcol = worksheet.Cells[$"{row}:{row}"].LastOrDefault(c =>
-                        //{
-                        //    Debug.WriteLine(c.Address + "====" +c.Value);
-                        //    return c.Value != null;
-                        //}).End.Column;
+
+                        //取得当前行的第23列后 最后一非空单元格列号
                         var endcell = worksheet.Cells[row, 23, row, worksheet.Dimension.End.Column]
-                            .LastOrDefault(c =>
-                            {
-                                Debug.WriteLine(c.Address + "====" + c.Value);
-                                return c.Value != null;
-                            });
-                        var endcol = endcell==null?23:endcell.End.Column;
-                        Debug.WriteLine(row + "====" + endcol);
-                        if (endcol > 24) //没有送货数据
+                            .LastOrDefault(c => c.Value != null);
+                        //如果无非空单元格则 取23列 
+                        var endcol = endcell == null ? 23 : endcell.End.Column;
+
+                        if (endcol > 24) //有送货数据
                         {
                             //添加入库信息
                             for (int col = 24; col < endcol; col += 3)
@@ -115,8 +108,7 @@ namespace ExcelApplication.Services
             }
             catch (Exception e)
             {
-
-                MessageBox.Show(e.Message);
+                MessageBox.Show("发生未知错误：" + e.Message);
                 return new List<caigoujinduModel>();
             }
         }

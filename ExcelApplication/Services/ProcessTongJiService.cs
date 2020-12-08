@@ -31,14 +31,17 @@ namespace ExcelApplication.Services
             }
             lists.Clear();
 
-            List<tongjiModel> tongjilist = Duizhanglist.GroupBy<duizhangModel, string>(m => m.gongyinshang)
-                .Select<IGrouping<string, duizhangModel>, tongjiModel>(tongji =>
+            List<tongjiModel> tongjilist = Duizhanglist
+                .GroupBy(m => new { m.gongyinshang,m.wuliaoleibie,m.wuliaomingcheng })
+                .Select(tongji =>
                 {
                     tongjiModel model = new tongjiModel();
-                    model.gongyinshang = tongji.Key;
+                    model.gongyinshang = tongji.Key.gongyinshang;
+                    model.wuliaoleibie = tongji.Key.wuliaoleibie;
+                    model.wuliaoming = tongji.Key.wuliaomingcheng;
                     model.pairs = tongji.GroupBy(n => n.songhuoriqi.ToString("yyyy-MM"))
-                        .Select<IGrouping<string, duizhangModel>, KeyValuePair<string, double>>(
-                            kvp => new KeyValuePair<string, double>(kvp.Key, kvp.Sum(x => x.jine))
+                        .Select<IGrouping<string, duizhangModel>, MonthData>(
+                            md => new MonthData(md.Key, md.Sum(x => x.shuliang), md.Sum(x => x.jine))
                         ).ToList();
                     return model;
                 }).ToList();

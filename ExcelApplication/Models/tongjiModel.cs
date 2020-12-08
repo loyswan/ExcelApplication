@@ -10,13 +10,18 @@ namespace ExcelApplication.Models
     {
         //供应商
         public string gongyinshang { get; set; }
-        //01月货款	02月货款	03月货款	04月货款	05月货款	06月货款	07月货款	08月货款	09月货款	10月货款	11月货款	12月货款
+        //物料类别
+        public string wuliaoleibie { get; set; }
+        //物料名称
+        public string wuliaoming { get; set; }
+
+        ////01月货款	02月货款	03月货款	04月货款	05月货款	06月货款	07月货款	08月货款	09月货款	10月货款	11月货款	12月货款
         //月份 字符串 ”yyyy-MM“
         //金额 月度求和金额
-        public List<KeyValuePair<string, double>> pairs = new List<KeyValuePair<string, double>>();
+        public List<MonthData> pairs = new List<MonthData>();
 
         //合计
-        public double hejijine => pairs.Sum(x => x.Value);
+        //public double hejijine => pairs.Sum(x => x.Value);
 
         //public void Add(string month, double jine) {
         //    if (pairs.Any(p=>p.Key==month))
@@ -28,7 +33,7 @@ namespace ExcelApplication.Models
 
         public List<string> GetMonthString()
         {
-            var month = pairs.GroupBy(p => p.Key).Select(g => g.First().Key).ToList();
+            var month = pairs.GroupBy(p => p.MonthString).Select(g => g.First().MonthString).ToList();
             ////List<string> month = new List<string>();
 
             //if (pairs.Count > 0)
@@ -44,5 +49,18 @@ namespace ExcelApplication.Models
 
     }
 
+    public struct MonthData {
+        public MonthData(string monthString, double number, double money)
+        {
+            MonthString = monthString ?? throw new ArgumentNullException(nameof(monthString));
+            Number = number;
+            Money = money;
+        }
+
+        public string MonthString { get; set; }
+        public double Number { get; set; }
+        public double Money { get; set; }
+
+    }
 
 }
