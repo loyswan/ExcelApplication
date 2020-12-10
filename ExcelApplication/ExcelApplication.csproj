@@ -5,7 +5,7 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <StartupObject>ExcelApplication.App</StartupObject>
-    <Version>2.1.1</Version>
+    <Version>2.2.0</Version>
     <Authors>蓝涂oO</Authors>
     <Description>ExcelApplication by 蓝涂oO</Description>
     <Copyright>蓝涂oO</Copyright>
