@@ -149,14 +149,30 @@ namespace ExcelApplication.Services
                 if (endrow >= 4)
                 {
                     //清除4行以后的内容
-                    worksheet.Cells[4, 1, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
+                    worksheet.Cells[4, 1, endrow, worksheet.Dimension.End.Column]
                         .Clear();
+                }
+                else if (endrow == 3)//有表头无内容
+                { 
+                
                 }
                 else
                 {
-                    //新表格填充标题行
-                    package.Dispose();//此处直接报错
-                    return $"Error: 工作簿中无{worksheetname}工作表不存在。";
+                    if (worksheetname.Contains("已完成"))
+                    {
+                        //新表格填充标题行
+                        var sht = package.Workbook.Worksheets["采购进度表"];
+                        var sourceRng = sht.Cells[1, 1, 3, 41];
+                        var rng = worksheet.Cells[1, 1, 3, 41];
+                        sourceRng.Copy(rng);
+                        sourceRng.StyleID = rng.StyleID;
+                    }
+                    else
+                    {
+                        package.Dispose();//直接报错
+                        return $"Error: 工作簿中【{worksheetname}】工作表不存在。";
+                    }
+
                 }
 
                 //填写内容  第四行开始填写（1、2行标题，3行格式行）
