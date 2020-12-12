@@ -5,7 +5,7 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <StartupObject>ExcelApplication.App</StartupObject>
-    <Version>2.2.0</Version>
+    <Version>2.2.1</Version>
     <Authors>蓝涂oO</Authors>
     <Description>ExcelApplication by 蓝涂oO</Description>
     <Copyright>蓝涂oO</Copyright>
@@ -25,11 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="ExcelFile\采购进度表12-06 - 复制.xlsx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="ExcelFile\采购进度表12-06.xlsx">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Roboto\Roboto-Black.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

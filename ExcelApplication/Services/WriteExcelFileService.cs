@@ -119,7 +119,7 @@ namespace ExcelApplication.Services
                     r.Style.Border.Right.Color.SetColor(Color.Black);
 
                     //自适应列宽
-                    r.AutoFitColumns();
+                    //r.AutoFitColumns();
                     //居中
                     r.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 }
@@ -236,14 +236,10 @@ namespace ExcelApplication.Services
                 {
                     //新表格填充标题行
                     string tableTitleString = "供应商月份应付账款表";
-                    string tableTitle1String = "制表人：区晓欣";
-                    string tableTitle2String = "审核：";
-                    string tableTitle3String = "领导审核：";
+                    string tableTitle1String = "  制表人：区晓欣         审核：          领导审核：";
 
                     worksheet.Cells[1, 1].Value = tableTitleString;
                     worksheet.Cells[2, 1].Value = tableTitle1String;
-                    worksheet.Cells[2, 3].Value = tableTitle2String;
-                    worksheet.Cells[2, 5].Value = tableTitle3String;
                     worksheet.Cells[1, 1].Style.Font.Size = 22;
                     worksheet.Cells[2, 1, 2, 5].Style.Font.Size = 12;
                 }
@@ -331,7 +327,7 @@ namespace ExcelApplication.Services
                     r.Style.Border.Right.Color.SetColor(Color.Black);
 
                     //自适应列宽
-                    r.AutoFitColumns();
+                    //r.AutoFitColumns();
                     //居中
                     r.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 }
