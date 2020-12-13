@@ -57,19 +57,28 @@ namespace ExcelApplication.Models
         public DateTime gongyinshangriqi { get; set; }
         //供应商备注   
         public string gongyinshangbeizhu { get; set; }
-        //欠到数/重量 
-        public int qiandaoshu { get; set; }
+        //欠到数/重量    必须在数据加载完成后
+        public int qiandaoshu
+        {
+            get
+            {
+                return this.caigoushu - this.GetrukuxinxiModels.Sum(x => x.songhuoshu);
+            }
+        }
 
 
         //List<rukuxinxiModel>  //入库信息列表
         private List<rukuxinxiModel> _rukuxinxiModels;
+        private int songhuoshu = 0;
 
         public void AddrukuxinxiModel(rukuxinxiModel model)
         {
             _rukuxinxiModels.Add(model);
+            songhuoshu += model.songhuoshu;
         }
 
         public List<rukuxinxiModel> GetrukuxinxiModels => _rukuxinxiModels;
+
     }
 
     public class rukuxinxiModel //入库信息

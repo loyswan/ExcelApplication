@@ -45,6 +45,11 @@ namespace ExcelApplication.Services
                     //清除4行以后的内容
                     worksheet.Cells[4, 1, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
                         .Clear();
+                    //修改标题
+                    if (!string.IsNullOrEmpty(tableTitle))
+                    {
+                        worksheet.Cells[1, 1].Value = tableTitle + "供应商对账明细表";
+                    }
                 }
                 else
                 {
@@ -153,8 +158,8 @@ namespace ExcelApplication.Services
                         .Clear();
                 }
                 else if (endrow == 3)//有表头无内容
-                { 
-                
+                {
+
                 }
                 else
                 {

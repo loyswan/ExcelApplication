@@ -77,7 +77,7 @@ namespace ExcelApplication.Services
                         model.xuqiuriqi = worksheet.Cells[row, 20].GetValue<DateTime>();
                         model.gongyinshangriqi = worksheet.Cells[row, 21].GetValue<DateTime>();
                         model.gongyinshangbeizhu = worksheet.Cells[row, 22].Text;
-                        model.qiandaoshu = worksheet.Cells[row, 23].GetValue<int>();
+                        //model.qiandaoshu = worksheet.Cells[row, 23].GetValue<int>();
 
                         //取得当前行的第23列后 最后一非空单元格列号
                         var endcell = worksheet.Cells[row, 23, row, worksheet.Dimension.End.Column]
