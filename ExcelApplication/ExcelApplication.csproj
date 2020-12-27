@@ -5,12 +5,12 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <StartupObject>ExcelApplication.App</StartupObject>
-    <Version>2.3.0</Version>
+    <Version>2.4.0</Version>
     <Authors>蓝涂oO</Authors>
     <Description>ExcelApplication by 蓝涂oO</Description>
     <Copyright>蓝涂oO</Copyright>
-    <AssemblyVersion>2.3.0.0</AssemblyVersion>
-    <FileVersion>2.3.0.0</FileVersion>
+    <AssemblyVersion>2.4.0.0</AssemblyVersion>
+    <FileVersion>2.4.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

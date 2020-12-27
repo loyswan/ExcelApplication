@@ -266,7 +266,7 @@ namespace ExcelApplication.Services
                 }
 
                 //填写表头行 字体加粗
-                string[] tableHeader1String = { "序号", "供应商", "物料类别", "物料名称" };
+                string[] tableHeader1String = { "序号", "供应商" };
                 string[] tableHeader2String = { "是否含税", "备注" };
 
                 int col = 1;

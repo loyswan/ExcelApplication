@@ -23,6 +23,7 @@ namespace ExcelApplication.Services
 
         private List<tongjiModel> lists;
 
+        /*
         public List<tongjiModel> GetList()
         {
             if (this.Duizhanglist == null || this.Duizhanglist.Count == 0)
@@ -47,7 +48,30 @@ namespace ExcelApplication.Services
                 }).ToList();
 
             return tongjilist;
+        }*/
 
+        public List<tongjiModel> GetList()
+        {
+            if (this.Duizhanglist == null || this.Duizhanglist.Count == 0)
+            {
+                return new List<tongjiModel>();
+            }
+            lists.Clear();
+
+            List<tongjiModel> tongjilist = Duizhanglist
+                .GroupBy(m =>  m.gongyinshang )
+                .Select(tongji =>
+                {
+                    tongjiModel model = new tongjiModel();
+                    model.gongyinshang = tongji.Key;
+                    model.pairs = tongji.GroupBy(n => n.songhuoriqi.ToString("yyyy-MM"))
+                        .Select<IGrouping<string, duizhangModel>, MonthData>(
+                            md => new MonthData(md.Key, md.Sum(x => x.shuliang), md.Sum(x => x.jine))
+                        ).ToList();
+                    return model;
+                }).ToList();
+
+            return tongjilist;
         }
 
         public void WriteFile(string filepath, List<tongjiModel> list = null)

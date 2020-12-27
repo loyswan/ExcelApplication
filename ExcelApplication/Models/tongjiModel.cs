@@ -33,7 +33,9 @@ namespace ExcelApplication.Models
 
         public List<string> GetMonthString()
         {
-            var month = pairs.GroupBy(p => p.MonthString).Select(g => g.First().MonthString).ToList();
+            var month = pairs.GroupBy(p => p.MonthString)
+                .Select(g => g.First().MonthString)
+                .ToList();
             ////List<string> month = new List<string>();
 
             //if (pairs.Count > 0)
@@ -49,7 +51,8 @@ namespace ExcelApplication.Models
 
     }
 
-    public struct MonthData {
+    public struct MonthData
+    {
         public MonthData(string monthString, double number, double money)
         {
             MonthString = monthString ?? throw new ArgumentNullException(nameof(monthString));
